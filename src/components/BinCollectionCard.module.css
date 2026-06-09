@@ -1,0 +1,145 @@
+.card {
+  background: var(--white);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.cardHeader {
+  padding: 1.25rem 1.5rem 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  border-bottom: 1px solid var(--grey-200);
+}
+
+.cardIcon {
+  width: 36px;
+  height: 36px;
+  background: var(--blue-bg);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent);
+  flex-shrink: 0;
+}
+
+.cardTitle {
+  font-size: 1.0625rem;
+  font-weight: 600;
+  color: var(--text);
+  letter-spacing: -0.01em;
+}
+
+.cardBody {
+  padding: 0.75rem 1.5rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.875rem 0;
+  border-bottom: 1px solid var(--grey-200);
+}
+
+.row:last-of-type {
+  border-bottom: none;
+}
+
+.rowLeft {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+}
+
+.binIcon {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.binLabel {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text);
+  margin-bottom: 0.125rem;
+}
+
+.binDate {
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+}
+
+.badge {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.25rem 0.625rem;
+  border-radius: 100px;
+  background: var(--grey-200);
+  color: var(--grey-800);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.badge.soon {
+  background: #fff8e1;
+  color: #7c5800;
+}
+
+.badge.urgent {
+  background: #fce8e6;
+  color: #b31412;
+}
+
+.gardenNote {
+  margin-top: 0.75rem;
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  background: var(--green-bg);
+  border-radius: var(--radius);
+  color: #1a5c30;
+}
+
+.infoIcon {
+  flex-shrink: 0;
+  margin-top: 1px;
+  color: #2e7d32;
+}
+
+.cardFooter {
+  padding: 0.875rem 1.5rem;
+  border-top: 1px solid var(--grey-200);
+  background: var(--grey-100);
+  display: flex;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.footerLink {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.footerLink:hover {
+  text-decoration: underline;
+  color: var(--accent-hover);
+}

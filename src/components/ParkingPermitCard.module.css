@@ -1,0 +1,212 @@
+.card {
+  background: var(--white);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.cardHeader {
+  padding: 1.25rem 1.5rem 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  border-bottom: 1px solid var(--grey-200);
+}
+
+.cardIcon {
+  width: 36px;
+  height: 36px;
+  background: var(--blue-bg);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent);
+  flex-shrink: 0;
+}
+
+.cardTitle {
+  font-size: 1.0625rem;
+  font-weight: 600;
+  color: var(--text);
+  letter-spacing: -0.01em;
+  flex: 1;
+}
+
+.statusBadge {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.25rem 0.625rem;
+  border-radius: 100px;
+  flex-shrink: 0;
+}
+
+.statusBadge.active {
+  background: var(--green-bg);
+  color: #1a5c30;
+}
+
+.statusBadge.inactive {
+  background: #fce8e6;
+  color: #b31412;
+}
+
+.cardBody {
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  flex: 1;
+}
+
+.permitNumber {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+  padding: 0.875rem 1rem;
+  background: var(--grey-100);
+  border-radius: var(--radius);
+  border: 1px solid var(--grey-200);
+}
+
+.permitLabel {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+}
+
+.permitValue {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--navy);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+}
+
+.field {
+  padding: 0.625rem 0;
+  border-bottom: 1px solid var(--grey-200);
+}
+
+.field:nth-last-child(-n+2) {
+  border-bottom: none;
+}
+
+.field dt {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  margin-bottom: 0.25rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.field dd {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text);
+}
+
+.plate {
+  display: inline-block;
+  background: #f7c948;
+  color: #1a1d23;
+  font-family: 'UKNumberPlate', 'Charles Wright', monospace;
+  font-weight: 700;
+  font-size: 0.875rem;
+  padding: 0.1875rem 0.5rem;
+  border-radius: 3px;
+  border: 1px solid #d4a800;
+  letter-spacing: 0.08em;
+}
+
+.expiry {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.875rem 1rem;
+  background: var(--blue-bg);
+  border-radius: var(--radius);
+  border: 1px solid #c8ddf4;
+  gap: 0.75rem;
+}
+
+.expiry.expiryWarning {
+  background: var(--amber-bg);
+  border-color: #f5c8a8;
+}
+
+.expiryLeft {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  color: var(--accent);
+}
+
+.expiryWarning .expiryLeft {
+  color: var(--amber);
+}
+
+.expiryLabel {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  margin-bottom: 0.125rem;
+}
+
+.expiryDate {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.expiryDays {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.expiryBadge {
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.25rem 0.75rem;
+  border-radius: 100px;
+  background: var(--amber);
+  color: white;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.cardFooter {
+  padding: 0.875rem 1.5rem;
+  border-top: 1px solid var(--grey-200);
+  background: var(--grey-100);
+  display: flex;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.footerLink {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.footerLink:hover {
+  text-decoration: underline;
+  color: var(--accent-hover);
+}
