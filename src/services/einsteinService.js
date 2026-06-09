@@ -11,8 +11,9 @@ export const startSession = async () => {
   const auth = getStoredAuth()
   if (!auth) throw new Error('Not authenticated')
 
-  const response = await fetch(
-    `${auth.instanceUrl}/services/data/${SF_CONFIG.apiVersion}/einstein/ai-assist/agents/${AGENT_ID}/sessions`,
+  const sessionUrl = `${auth.instanceUrl}/services/data/${SF_CONFIG.apiVersion}/einstein/ai-assist/agents/${AGENT_ID}/sessions`
+  console.log('Agentforce session URL:', sessionUrl)
+  const response = await fetch(sessionUrl,
     {
       method: 'POST',
       headers: {
@@ -27,8 +28,9 @@ export const startSession = async () => {
   )
 
   if (!response.ok) {
-    const err = await response.json().catch(() => [{}])
-    throw new Error(err[0]?.message || 'Failed to start Einstein session')
+    const body = await response.text()
+    console.error('Agentforce startSession failed', response.status, body)
+    throw new Error(`Session error ${response.status}: ${body}`)
   }
 
   const data = await response.json()
@@ -59,8 +61,9 @@ export const sendMessage = async (text) => {
   )
 
   if (!response.ok) {
-    const err = await response.json().catch(() => [{}])
-    throw new Error(err[0]?.message || 'Einstein failed to respond')
+    const body = await response.text()
+    console.error('Agentforce sendMessage failed', response.status, body)
+    throw new Error(`Message error ${response.status}: ${body}`)
   }
 
   const data = await response.json()
