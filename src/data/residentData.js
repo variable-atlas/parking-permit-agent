@@ -3,7 +3,7 @@ export const resident = {
   address: {
     line1: '14 Elm Close',
     line2: '',
-    town: 'Thornbury',
+    town: 'Hamberly',
     postcode: 'BS35 2AB',
   },
   accountNumber: 'RES-2019-0047283',
@@ -37,11 +37,11 @@ export const binCollections = {
 export const parkingPermit = {
   permitNumber: 'BP-2024-47823',
   type: 'Resident Parking Permit',
-  zone: 'Zone B – Thornbury Central',
+  zone: 'Zone B – Hamberly Central',
   status: 'active',
   issueDate: '2024-04-01',
   expiryDate: '2027-03-31',
-  registeredAddress: '14 Elm Close, Thornbury, BS35 2AB',
+  registeredAddress: '14 Elm Close, Hamberly, BS35 2AB',
   vehicle: {
     make: 'Vauxhall',
     model: 'Astra',

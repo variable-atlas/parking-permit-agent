@@ -81,7 +81,7 @@ export default function App() {
         <Header />
         <main className={styles.loginScreen}>
           <div className={styles.loginCard}>
-            <div className={styles.loginCouncilName}>South Thornbury District Council</div>
+            <div className={styles.loginCouncilName}>Hamberly County Council</div>
             <h1 className={styles.loginHeading}>Sign in to your account</h1>
             <p className={styles.loginBody}>
               Access your personalised council services including bin collections,
@@ -99,14 +99,14 @@ export default function App() {
               Sign in with Salesforce
             </button>
             <p className={styles.loginNote}>
-              You will be redirected to the South Thornbury secure sign-in page.
+              You will be redirected to the Hamberly secure sign-in page.
             </p>
           </div>
         </main>
         <footer className={styles.footer}>
           <div className={styles.footerInner}>
             <div className={styles.footerBottom}>
-              <span>© 2026 South Thornbury District Council. All rights reserved.</span>
+              <span>© 2026 Hamberly County Council. All rights reserved.</span>
               <span>Registered in England. Company no. 00987654</span>
             </div>
           </div>
@@ -121,6 +121,7 @@ export default function App() {
 
       <main className={styles.main} id="main-content">
         <div className={styles.welcomeBanner}>
+          <div className={styles.heroImage} aria-hidden="true" />
           <div className={styles.welcomeInner}>
             <div className={styles.welcomeText}>
               <div className={styles.greeting}>{getGreeting()}</div>
@@ -200,9 +201,9 @@ export default function App() {
         <div className={styles.footerInner}>
           <div className={styles.footerTop}>
             <div>
-              <div className={styles.footerCouncil}>South Thornbury District Council</div>
-              <div className={styles.footerAddress}>Council Offices, High Street, Thornbury, BS35 1HF</div>
-              <div className={styles.footerAddress}>Tel: 01454 862 000 &nbsp;|&nbsp; enquiries@sthornbury.gov.uk</div>
+              <div className={styles.footerCouncil}>Hamberly County Council</div>
+              <div className={styles.footerAddress}>Council Offices, Market Square, Hamberly, HB1 1AA</div>
+              <div className={styles.footerAddress}>Tel: 01454 862 000 &nbsp;|&nbsp; enquiries@hamberly.gov.uk</div>
             </div>
             <div className={styles.footerLinks}>
               <a href="/">Accessibility statement</a>
@@ -212,7 +213,7 @@ export default function App() {
             </div>
           </div>
           <div className={styles.footerBottom}>
-            <span>© 2026 South Thornbury District Council. All rights reserved.</span>
+            <span>© 2026 Hamberly County Council. All rights reserved.</span>
             <span>Registered in England. Company no. 00987654</span>
           </div>
         </div>

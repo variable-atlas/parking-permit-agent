@@ -11,11 +11,25 @@
 /* Welcome banner */
 
 .welcomeBanner {
+  position: relative;
   background: var(--navy);
   border-bottom: 3px solid var(--accent);
+  overflow: hidden;
+}
+
+.heroImage {
+  position: absolute;
+  inset: 0;
+  background-image: url('/hero.jpg');
+  background-size: cover;
+  background-position: center 40%;
+  opacity: 0.28;
+  z-index: 0;
 }
 
 .welcomeInner {
+  position: relative;
+  z-index: 1;
   max-width: 1200px;
   margin: 0 auto;
   padding: 2rem 1.5rem;
