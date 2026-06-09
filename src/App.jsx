@@ -3,6 +3,7 @@ import Header from './components/Header'
 import BinCollectionCard from './components/BinCollectionCard'
 import ParkingPermitCard from './components/ParkingPermitCard'
 import RoadworksCard from './components/RoadworksCard'
+import ChatWidget from './components/ChatWidget'
 import { resident } from './data/residentData'
 import { initiateLogin, handleCallback, getStoredAuth, logout } from './services/salesforceAuth'
 import { fetchParkingPermit } from './services/salesforceService'
@@ -160,6 +161,8 @@ export default function App() {
               Parking permit data loaded live from Salesforce
             </div>
           )}
+
+          <ChatWidget />
 
           <section aria-label="Your services">
             <h2 className={styles.sectionHeading}>Your services</h2>
