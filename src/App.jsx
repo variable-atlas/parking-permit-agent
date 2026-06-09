@@ -1,8 +1,11 @@
+import { useState, useEffect } from 'react'
 import Header from './components/Header'
 import BinCollectionCard from './components/BinCollectionCard'
 import ParkingPermitCard from './components/ParkingPermitCard'
 import RoadworksCard from './components/RoadworksCard'
 import { resident } from './data/residentData'
+import { initiateLogin, handleCallback, getStoredAuth, logout } from './services/salesforceAuth'
+import { fetchParkingPermit } from './services/salesforceService'
 import styles from './App.module.css'
 
 const getGreeting = () => {
@@ -12,12 +15,109 @@ const getGreeting = () => {
   return 'Good evening'
 }
 
+// auth states: 'checking' | 'unauthenticated' | 'authenticated' | 'error'
+
 export default function App() {
   const { name, address, accountNumber } = resident
+  const [authState, setAuthState] = useState('checking')
+  const [authError, setAuthError] = useState(null)
+  const [sfPermit, setSfPermit] = useState(null)
+  const [permitLoading, setPermitLoading] = useState(false)
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    const code = params.get('code')
+
+    if (code) {
+      // We're back from Salesforce — exchange the code for a token
+      window.history.replaceState({}, '', window.location.pathname)
+      handleCallback(code)
+        .then(() => setAuthState('authenticated'))
+        .catch((err) => {
+          setAuthError(err.message)
+          setAuthState('error')
+        })
+    } else if (getStoredAuth()) {
+      setAuthState('authenticated')
+    } else {
+      setAuthState('unauthenticated')
+    }
+  }, [])
+
+  useEffect(() => {
+    if (authState !== 'authenticated') return
+    setPermitLoading(true)
+    fetchParkingPermit()
+      .then((record) => setSfPermit(record))
+      .catch((err) => {
+        if (err.message === 'Session expired') setAuthState('unauthenticated')
+        // If the custom object doesn't exist yet, silently fall back to fake data
+        console.warn('Salesforce permit fetch failed, using demo data:', err.message)
+      })
+      .finally(() => setPermitLoading(false))
+  }, [authState])
+
+  const handleLogout = () => {
+    logout()
+    setAuthState('unauthenticated')
+    setSfPermit(null)
+  }
+
+  if (authState === 'checking') {
+    return (
+      <div className={styles.layout}>
+        <Header />
+        <div className={styles.loadingScreen}>
+          <div className={styles.spinner} aria-label="Loading" />
+          <p>Connecting to your account…</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (authState === 'unauthenticated' || authState === 'error') {
+    return (
+      <div className={styles.layout}>
+        <Header />
+        <main className={styles.loginScreen}>
+          <div className={styles.loginCard}>
+            <div className={styles.loginCouncilName}>South Thornbury District Council</div>
+            <h1 className={styles.loginHeading}>Sign in to your account</h1>
+            <p className={styles.loginBody}>
+              Access your personalised council services including bin collections,
+              parking permits, and local information.
+            </p>
+            {authError && (
+              <div className={styles.loginError} role="alert">
+                <strong>Sign in failed:</strong> {authError}
+              </div>
+            )}
+            <button className={styles.loginButton} onClick={initiateLogin}>
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+                <path d="M9 1.5a7.5 7.5 0 100 15A7.5 7.5 0 009 1.5zm0 3a2.25 2.25 0 110 4.5A2.25 2.25 0 019 4.5zm0 10.5a5.25 5.25 0 01-4.5-2.55c.023-1.5 3-2.325 4.5-2.325 1.492 0 4.477.825 4.5 2.325A5.25 5.25 0 019 15z" fill="currentColor"/>
+              </svg>
+              Sign in with Salesforce
+            </button>
+            <p className={styles.loginNote}>
+              You will be redirected to the South Thornbury secure sign-in page.
+            </p>
+          </div>
+        </main>
+        <footer className={styles.footer}>
+          <div className={styles.footerInner}>
+            <div className={styles.footerBottom}>
+              <span>© 2026 South Thornbury District Council. All rights reserved.</span>
+              <span>Registered in England. Company no. 00987654</span>
+            </div>
+          </div>
+        </footer>
+      </div>
+    )
+  }
 
   return (
     <div className={styles.layout}>
-      <Header />
+      <Header onLogout={handleLogout} />
 
       <main className={styles.main} id="main-content">
         <div className={styles.welcomeBanner}>
@@ -32,7 +132,9 @@ export default function App() {
             <div className={styles.accountMeta}>
               <div className={styles.accountLabel}>Account reference</div>
               <div className={styles.accountNumber}>{accountNumber}</div>
-              <a href="/" className={styles.accountLink}>Manage account settings</a>
+              <button onClick={handleLogout} className={styles.accountLink} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
+                Sign out
+              </button>
             </div>
           </div>
         </div>
@@ -48,6 +150,16 @@ export default function App() {
             </span>
           </div>
 
+          {sfPermit && (
+            <div className={styles.sfBanner} role="status">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+                <circle cx="7" cy="7" r="6" stroke="currentColor" strokeWidth="1.2"/>
+                <path d="M4.5 7l2 2 3-3" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+              Parking permit data loaded live from Salesforce
+            </div>
+          )}
+
           <section aria-label="Your services">
             <h2 className={styles.sectionHeading}>Your services</h2>
             <p className={styles.sectionSubheading}>
@@ -55,7 +167,7 @@ export default function App() {
             </p>
             <div className={styles.cardsGrid}>
               <BinCollectionCard />
-              <ParkingPermitCard />
+              <ParkingPermitCard sfData={sfPermit} loading={permitLoading} />
               <RoadworksCard />
             </div>
           </section>

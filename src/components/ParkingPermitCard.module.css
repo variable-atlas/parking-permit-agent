@@ -49,6 +49,22 @@
   color: #1a5c30;
 }
 
+.loadingBadge {
+  font-size: 0.75rem;
+  font-weight: 500;
+  padding: 0.25rem 0.625rem;
+  border-radius: 100px;
+  background: var(--grey-200);
+  color: var(--text-muted);
+  flex-shrink: 0;
+  animation: pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
 .statusBadge.inactive {
   background: #fce8e6;
   color: #b31412;
@@ -117,6 +133,24 @@
   font-size: 0.875rem;
   font-weight: 500;
   color: var(--text);
+}
+
+.paidBadge {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.2rem 0.5rem;
+  border-radius: 100px;
+  background: var(--green-bg);
+  color: #1a5c30;
+}
+
+.unpaidBadge {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.2rem 0.5rem;
+  border-radius: 100px;
+  background: #fce8e6;
+  color: #b31412;
 }
 
 .plate {
