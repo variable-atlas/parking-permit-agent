@@ -5,7 +5,23 @@ import styles from './RenewPermitModal.module.css'
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY)
 
-const RENEWAL_AMOUNT = 65.00
+const PERMIT_OPTIONS = [
+  {
+    id: '6m',
+    label: '6 months',
+    amount: 120.00,
+    newExpiry: '30 September 2027',
+    description: 'Valid for 6 months from renewal',
+  },
+  {
+    id: '12m',
+    label: '12 months',
+    amount: 240.00,
+    newExpiry: '31 March 2028',
+    description: 'Best value — save vs two 6-month renewals',
+    recommended: true,
+  },
+]
 
 const CheckIcon = () => (
   <svg width="48" height="48" viewBox="0 0 48 48" fill="none" aria-hidden="true">
@@ -15,7 +31,7 @@ const CheckIcon = () => (
   </svg>
 )
 
-function PaymentForm({ permitNumber, onSuccess, onCancel }) {
+function PaymentForm({ amount, onSuccess, onCancel }) {
   const stripe = useStripe()
   const elements = useElements()
   const [processing, setProcessing] = useState(false)
@@ -24,28 +40,15 @@ function PaymentForm({ permitNumber, onSuccess, onCancel }) {
   const handleSubmit = async (e) => {
     e.preventDefault()
     if (!stripe || !elements) return
-
     setProcessing(true)
     setError(null)
 
     const { error: submitError } = await elements.submit()
-    if (submitError) {
-      setError(submitError.message)
-      setProcessing(false)
-      return
-    }
+    if (submitError) { setError(submitError.message); setProcessing(false); return }
 
-    const { error: confirmError } = await stripe.confirmPayment({
-      elements,
-      redirect: 'if_required',
-    })
-
-    if (confirmError) {
-      setError(confirmError.message)
-      setProcessing(false)
-    } else {
-      onSuccess()
-    }
+    const { error: confirmError } = await stripe.confirmPayment({ elements, redirect: 'if_required' })
+    if (confirmError) { setError(confirmError.message); setProcessing(false) }
+    else onSuccess()
   }
 
   return (
@@ -53,7 +56,6 @@ function PaymentForm({ permitNumber, onSuccess, onCancel }) {
       <div className={styles.paymentElement}>
         <PaymentElement options={{ layout: 'tabs' }} />
       </div>
-
       {error && (
         <div className={styles.error} role="alert">
           <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
@@ -63,52 +65,48 @@ function PaymentForm({ permitNumber, onSuccess, onCancel }) {
           {error}
         </div>
       )}
-
       <div className={styles.formActions}>
         <button type="button" className={styles.cancelBtn} onClick={onCancel} disabled={processing}>
-          Cancel
+          Back
         </button>
         <button type="submit" className={styles.payBtn} disabled={!stripe || processing}>
-          {processing ? (
-            <>
-              <span className={styles.spinner} aria-hidden="true" />
-              Processing…
-            </>
-          ) : (
-            `Pay £${RENEWAL_AMOUNT.toFixed(2)}`
-          )}
+          {processing ? <><span className={styles.spinner} aria-hidden="true" />Processing…</> : `Pay £${amount.toFixed(2)}`}
         </button>
       </div>
-
-      <p className={styles.testNote}>
-        Test card: 4242 4242 4242 4242 · Any future date · Any CVC
-      </p>
+      <p className={styles.testNote}>Test card: 4242 4242 4242 4242 · Any future date · Any CVC</p>
     </form>
   )
 }
 
 export default function RenewPermitModal({ permit, onClose }) {
+  const [step, setStep] = useState('select') // 'select' | 'payment' | 'success'
+  const [selectedOption, setSelectedOption] = useState(null)
   const [clientSecret, setClientSecret] = useState(null)
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(false)
   const [fetchError, setFetchError] = useState(null)
-  const [succeeded, setSucceeded] = useState(false)
 
-  useEffect(() => {
-    fetch('/api/create-payment-intent', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ amount: RENEWAL_AMOUNT, permitNumber: permit?.permitNumber }),
-    })
-      .then((r) => r.json())
-      .then((data) => {
-        if (data.error) throw new Error(data.error)
-        setClientSecret(data.clientSecret)
+  const handleSelectOption = async (option) => {
+    setSelectedOption(option)
+    setLoading(true)
+    setFetchError(null)
+
+    try {
+      const res = await fetch('/api/create-payment-intent', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ amount: option.amount, permitNumber: permit?.permitNumber }),
       })
-      .catch((err) => setFetchError(err.message))
-      .finally(() => setLoading(false))
-  }, [])
+      const data = await res.json()
+      if (data.error) throw new Error(data.error)
+      setClientSecret(data.clientSecret)
+      setStep('payment')
+    } catch (err) {
+      setFetchError(err.message)
+    } finally {
+      setLoading(false)
+    }
+  }
 
-  // Close on backdrop click
   const handleBackdrop = (e) => {
     if (e.target === e.currentTarget) onClose()
   }
@@ -117,12 +115,7 @@ export default function RenewPermitModal({ permit, onClose }) {
     clientSecret,
     appearance: {
       theme: 'stripe',
-      variables: {
-        colorPrimary: '#2d4a3e',
-        colorBackground: '#ffffff',
-        borderRadius: '6px',
-        fontFamily: 'Inter, system-ui, sans-serif',
-      },
+      variables: { colorPrimary: '#2d4a3e', colorBackground: '#ffffff', borderRadius: '6px', fontFamily: 'Inter, system-ui, sans-serif' },
     },
   } : null
 
@@ -130,7 +123,8 @@ export default function RenewPermitModal({ permit, onClose }) {
     <div className={styles.backdrop} onClick={handleBackdrop} role="dialog" aria-modal="true" aria-labelledby="modal-heading">
       <div className={styles.modal}>
 
-        {succeeded ? (
+        {/* ── Step: Success ── */}
+        {step === 'success' && (
           <div className={styles.success}>
             <CheckIcon />
             <h2 className={styles.successHeading}>Payment successful</h2>
@@ -143,17 +137,24 @@ export default function RenewPermitModal({ permit, onClose }) {
                 <strong>{permit?.permitNumber}</strong>
               </div>
               <div className={styles.successRow}>
+                <span>Duration</span>
+                <strong>{selectedOption?.label}</strong>
+              </div>
+              <div className={styles.successRow}>
                 <span>Amount paid</span>
-                <strong>£{RENEWAL_AMOUNT.toFixed(2)}</strong>
+                <strong>£{selectedOption?.amount.toFixed(2)}</strong>
               </div>
               <div className={styles.successRow}>
                 <span>New expiry</span>
-                <strong>31 March 2028</strong>
+                <strong>{selectedOption?.newExpiry}</strong>
               </div>
             </div>
             <button className={styles.doneBtn} onClick={onClose}>Done</button>
           </div>
-        ) : (
+        )}
+
+        {/* ── Step: Duration selection ── */}
+        {step === 'select' && (
           <>
             <div className={styles.modalHeader}>
               <div>
@@ -167,41 +168,73 @@ export default function RenewPermitModal({ permit, onClose }) {
               </button>
             </div>
 
+            <div className={styles.selectBody}>
+              <p className={styles.selectPrompt}>Choose your renewal duration:</p>
+              <div className={styles.optionTiles}>
+                {PERMIT_OPTIONS.map((option) => (
+                  <button
+                    key={option.id}
+                    className={`${styles.optionTile} ${option.recommended ? styles.optionRecommended : ''}`}
+                    onClick={() => handleSelectOption(option)}
+                    disabled={loading}
+                  >
+                    {option.recommended && <span className={styles.recommendedBadge}>Best value</span>}
+                    <div className={styles.optionDuration}>{option.label}</div>
+                    <div className={styles.optionAmount}>£{option.amount.toFixed(2)}</div>
+                    <div className={styles.optionExpiry}>Expires {option.newExpiry}</div>
+                    <div className={styles.optionDescription}>{option.description}</div>
+                  </button>
+                ))}
+              </div>
+              {fetchError && (
+                <div className={styles.error} role="alert">Failed to initialise payment: {fetchError}</div>
+              )}
+              {loading && (
+                <div className={styles.loadingState}>
+                  <div className={styles.spinner} />
+                  <span>Preparing payment…</span>
+                </div>
+              )}
+            </div>
+          </>
+        )}
+
+        {/* ── Step: Payment ── */}
+        {step === 'payment' && clientSecret && stripeOptions && (
+          <>
+            <div className={styles.modalHeader}>
+              <div>
+                <h2 id="modal-heading" className={styles.modalTitle}>Complete Payment</h2>
+                <p className={styles.modalSubtitle}>{selectedOption?.label} renewal — {permit?.permitNumber}</p>
+              </div>
+              <button className={styles.closeBtn} onClick={onClose} aria-label="Close">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                  <path d="M3 3l10 10M13 3L3 13" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
+                </svg>
+              </button>
+            </div>
+
             <div className={styles.summary}>
               <div className={styles.summaryRow}>
-                <span>Annual resident permit renewal</span>
-                <span>£{RENEWAL_AMOUNT.toFixed(2)}</span>
+                <span>{selectedOption?.label} resident permit renewal</span>
+                <span>£{selectedOption?.amount.toFixed(2)}</span>
               </div>
               <div className={`${styles.summaryRow} ${styles.summaryTotal}`}>
                 <span>Total</span>
-                <span>£{RENEWAL_AMOUNT.toFixed(2)}</span>
+                <span>£{selectedOption?.amount.toFixed(2)}</span>
               </div>
             </div>
 
-            {loading && (
-              <div className={styles.loadingState}>
-                <div className={styles.spinner} aria-label="Loading payment form" />
-                <span>Loading payment form…</span>
-              </div>
-            )}
-
-            {fetchError && (
-              <div className={styles.error} role="alert">
-                Failed to initialise payment: {fetchError}
-              </div>
-            )}
-
-            {clientSecret && stripeOptions && (
-              <Elements stripe={stripePromise} options={stripeOptions}>
-                <PaymentForm
-                  permitNumber={permit?.permitNumber}
-                  onSuccess={() => setSucceeded(true)}
-                  onCancel={onClose}
-                />
-              </Elements>
-            )}
+            <Elements stripe={stripePromise} options={stripeOptions}>
+              <PaymentForm
+                amount={selectedOption?.amount}
+                onSuccess={() => setStep('success')}
+                onCancel={() => { setStep('select'); setClientSecret(null) }}
+              />
+            </Elements>
           </>
         )}
+
       </div>
     </div>
   )
