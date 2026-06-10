@@ -153,15 +153,6 @@ export default function App() {
             </span>
           </div>
 
-          {sfPermit && (
-            <div className={styles.sfBanner} role="status">
-              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
-                <circle cx="7" cy="7" r="6" stroke="currentColor" strokeWidth="1.2"/>
-                <path d="M4.5 7l2 2 3-3" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-              Parking permit data loaded live from Salesforce
-            </div>
-          )}
 
           <div className={styles.chatInvite}>
             <div className={styles.chatInviteLeft}>
