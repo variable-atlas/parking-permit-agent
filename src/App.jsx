@@ -3,7 +3,7 @@ import Header from './components/Header'
 import BinCollectionCard from './components/BinCollectionCard'
 import ParkingPermitCard from './components/ParkingPermitCard'
 import RoadworksCard from './components/RoadworksCard'
-import ChatWidget from './components/ChatWidget'
+import SalesforceChat from './components/SalesforceChat'
 import { resident } from './data/residentData'
 import { initiateLogin, handleCallback, getStoredAuth, logout } from './services/salesforceAuth'
 import { fetchParkingPermit } from './services/salesforceService'
@@ -120,6 +120,7 @@ export default function App() {
     <div className={styles.layout}>
       <Header onLogout={handleLogout} />
 
+      <SalesforceChat />
       <main className={styles.main} id="main-content">
         <div className={styles.welcomeBanner}>
           <div className={styles.heroImage} aria-hidden="true" />
@@ -162,7 +163,21 @@ export default function App() {
             </div>
           )}
 
-          <ChatWidget />
+          <div className={styles.chatInvite}>
+            <div className={styles.chatInviteLeft}>
+              <div className={styles.chatOnlineDot} aria-hidden="true" />
+              <div>
+                <div className={styles.chatInviteTitle}>Hamberly Assistant is online</div>
+                <div className={styles.chatInviteBody}>Have a question about your permit, collections, or local services? Chat with our digital assistant.</div>
+              </div>
+            </div>
+            <button
+              className={styles.chatInviteBtn}
+              onClick={() => window.embeddedservice_bootstrap?.utilAPI?.launchChat?.()}
+            >
+              Start a conversation
+            </button>
+          </div>
 
           <section aria-label="Your services">
             <h2 className={styles.sectionHeading}>Your services</h2>

@@ -406,6 +406,72 @@
   color: #1a5c30;
 }
 
+/* Chat invite banner */
+
+.chatInvite {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  padding: 1.125rem 1.5rem;
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--navy);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+.chatInviteLeft {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+}
+
+.chatOnlineDot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #4caf6e;
+  flex-shrink: 0;
+  box-shadow: 0 0 0 3px rgba(76,175,110,0.2);
+  animation: pulse-green 2s ease-in-out infinite;
+}
+
+@keyframes pulse-green {
+  0%, 100% { box-shadow: 0 0 0 3px rgba(76,175,110,0.2); }
+  50% { box-shadow: 0 0 0 6px rgba(76,175,110,0.08); }
+}
+
+.chatInviteTitle {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 0.2rem;
+}
+
+.chatInviteBody {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+}
+
+.chatInviteBtn {
+  flex-shrink: 0;
+  padding: 0.625rem 1.25rem;
+  background: var(--navy);
+  color: var(--white);
+  font-size: 0.875rem;
+  font-weight: 600;
+  border: none;
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: background 0.15s;
+  white-space: nowrap;
+}
+
+.chatInviteBtn:hover {
+  background: var(--navy-mid);
+}
+
 /* Responsive */
 
 @media (max-width: 960px) {
