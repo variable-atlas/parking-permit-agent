@@ -1,4 +1,6 @@
+import { useState } from 'react'
 import { parkingPermit } from '../data/residentData'
+import RenewPermitModal from './RenewPermitModal'
 import styles from './ParkingPermitCard.module.css'
 
 const formatDate = (isoDate) => {
@@ -38,6 +40,7 @@ const fromFakeData = (data) => ({
 })
 
 export default function ParkingPermitCard({ sfData, loading }) {
+  const [showRenew, setShowRenew] = useState(false)
   const raw = sfData ? fromSalesforce(sfData) : fromFakeData(parkingPermit)
   const { permitNumber, status, address, paid, startDate, expiryDate, value } = raw
   const days = daysUntilExpiry(expiryDate)
@@ -118,9 +121,16 @@ export default function ParkingPermitCard({ sfData, loading }) {
       </div>
 
       <div className={styles.cardFooter}>
-        <a href="/" className={styles.footerLink}>Renew permit</a>
+        <button className={styles.footerLink} onClick={() => setShowRenew(true)}>Renew permit</button>
         <a href="/" className={styles.footerLink}>View permit history</a>
       </div>
+
+      {showRenew && (
+        <RenewPermitModal
+          permit={{ permitNumber, address }}
+          onClose={() => setShowRenew(false)}
+        />
+      )}
     </article>
   )
 }
