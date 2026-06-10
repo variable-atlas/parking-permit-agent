@@ -1,10 +1,10 @@
 export const resident = {
-  name: 'Sarah Thompson',
+  name: 'Rachel Rothwell',
   address: {
-    line1: '14 Elm Close',
+    line1: '34 Chester Street',
     line2: '',
     town: 'Hamberly',
-    postcode: 'BS35 2AB',
+    postcode: 'H23 6TY',
   },
   accountNumber: 'RES-2019-0047283',
 }
