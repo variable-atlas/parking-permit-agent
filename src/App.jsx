@@ -4,6 +4,7 @@ import BinCollectionCard from './components/BinCollectionCard'
 import ParkingPermitCard from './components/ParkingPermitCard'
 import RoadworksCard from './components/RoadworksCard'
 import SalesforceChat from './components/SalesforceChat'
+import ChatWidget from './components/ChatWidget'
 import { resident } from './data/residentData'
 import { initiateLogin, handleCallback, getStoredAuth, logout } from './services/salesforceAuth'
 import { fetchParkingPermit } from './services/salesforceService'
@@ -153,6 +154,8 @@ export default function App() {
             </span>
           </div>
 
+
+          <ChatWidget />
 
           <div className={styles.chatInvite}>
             <div className={styles.chatInviteLeft}>

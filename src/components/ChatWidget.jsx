@@ -1,5 +1,4 @@
 import { useState, useRef, useEffect } from 'react'
-import { sendMessage, endSession } from '../services/einsteinService'
 import { resident } from '../data/residentData'
 import styles from './ChatWidget.module.css'
 
@@ -42,20 +41,85 @@ export default function ChatWidget() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
   const [collapsed, setCollapsed] = useState(false)
+  const [session, setSession] = useState(null) // { accessToken, conversationId }
+  const [connecting, setConnecting] = useState(false)
   const bottomRef = useRef(null)
   const inputRef = useRef(null)
+  const eventSourceRef = useRef(null)
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages, loading])
 
+  // Clean up SSE on unmount
   useEffect(() => {
-    return () => { endSession() }
+    return () => eventSourceRef.current?.close()
   }, [])
+
+  const startSession = async () => {
+    setConnecting(true)
+    setError(null)
+    try {
+      const res = await fetch('/api/chat/session', { method: 'POST' })
+      const data = await res.json()
+      if (data.error) throw new Error(data.error)
+      setSession(data)
+      connectStream(data)
+      return data
+    } catch (err) {
+      setError(`Could not connect to assistant: ${err.message}`)
+      return null
+    } finally {
+      setConnecting(false)
+    }
+  }
+
+  const connectStream = ({ accessToken, conversationId }) => {
+    eventSourceRef.current?.close()
+    const url = `/api/chat/stream?conversationId=${encodeURIComponent(conversationId)}&accessToken=${encodeURIComponent(accessToken)}`
+    const es = new EventSource(url)
+
+    es.onmessage = (e) => {
+      try {
+        const payload = JSON.parse(e.data)
+        handleStreamEvent(payload)
+      } catch {
+        // non-JSON heartbeat lines — ignore
+      }
+    }
+
+    es.onerror = () => {
+      // SSE reconnects automatically; only surface persistent errors
+    }
+
+    eventSourceRef.current = es
+  }
+
+  const handleStreamEvent = (event) => {
+    // Salesforce MIAW SSE event types
+    const type = event?.conversationEntry?.entryType || event?.type
+
+    if (type === 'Message') {
+      const entry = event.conversationEntry
+      const text = entry?.entryPayload?.abstractMessage?.staticContent?.text
+        || entry?.entryPayload?.text
+        || ''
+      if (text && entry?.sender?.role !== 'EndUser') {
+        setMessages((prev) => [
+          ...prev,
+          { id: entry.identifier || Date.now(), role: 'agent', text },
+        ])
+        setLoading(false)
+      }
+    }
+
+    if (type === 'TypingStartedIndicator') setLoading(true)
+    if (type === 'TypingStoppedIndicator') setLoading(false)
+  }
 
   const handleSend = async () => {
     const text = input.trim()
-    if (!text || loading) return
+    if (!text || loading || connecting) return
 
     setInput('')
     setError(null)
@@ -63,14 +127,31 @@ export default function ChatWidget() {
     setLoading(true)
 
     try {
-      const reply = await sendMessage(text)
-      setMessages((prev) => [...prev, { id: Date.now() + 1, role: 'agent', text: reply }])
+      let activeSession = session
+      if (!activeSession) {
+        activeSession = await startSession()
+        if (!activeSession) return
+      }
+
+      const res = await fetch('/api/chat/message', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          accessToken: activeSession.accessToken,
+          conversationId: activeSession.conversationId,
+          text,
+        }),
+      })
+
+      const data = await res.json()
+      if (data.error) throw new Error(data.error)
+      // Response will arrive via SSE stream
     } catch (err) {
       setError(err.message)
-    } finally {
       setLoading(false)
-      inputRef.current?.focus()
     }
+
+    inputRef.current?.focus()
   }
 
   const handleKeyDown = (e) => {
@@ -87,7 +168,9 @@ export default function ChatWidget() {
           <div className={styles.onlineDot} aria-hidden="true" />
           <div>
             <div className={styles.widgetTitle}>Hamberly Assistant</div>
-            <div className={styles.widgetSubtitle}>Powered by Salesforce Einstein</div>
+            <div className={styles.widgetSubtitle}>
+              {connecting ? 'Connecting…' : 'Powered by Salesforce Einstein'}
+            </div>
           </div>
         </div>
         <button
@@ -95,7 +178,8 @@ export default function ChatWidget() {
           onClick={() => setCollapsed((c) => !c)}
           aria-label={collapsed ? 'Expand chat' : 'Collapse chat'}
         >
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true" style={{ transform: collapsed ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }}>
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"
+            style={{ transform: collapsed ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }}>
             <path d="M3 6l5 5 5-5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
         </button>
@@ -147,12 +231,12 @@ export default function ChatWidget() {
               placeholder="Ask me anything about your Hamberly services…"
               rows={1}
               aria-label="Chat message"
-              disabled={loading}
+              disabled={loading || connecting}
             />
             <button
               className={styles.sendBtn}
               onClick={handleSend}
-              disabled={!input.trim() || loading}
+              disabled={!input.trim() || loading || connecting}
               aria-label="Send message"
             >
               <SendIcon />
